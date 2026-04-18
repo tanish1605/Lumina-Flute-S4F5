@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumina Flute — Sound Made Visible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #020b14;
+  --bg2: #071624;
+  --bg3: #0a1f33;
+  --teal: #00e5b3;
+  --teal2: #00ffcc;
+  --blue: #4fc3f7;
+  --amber: #ffb347;
+  --red: #ff4d6d;
+  --purple: #b794f4;
+  --text: #c8e8ff;
+  --text-dim: #5a80a0;
+  --border: rgba(0,229,179,0.12);
+  --border2: rgba(79,195,247,0.15);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-weight:400;
+  overflow-x:hidden;
+}
+a { text-decoration:none; }
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  padding:1rem 2.5rem;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(2,11,20,0.85);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo {
+  font-family:'Orbitron',sans-serif;
+  font-weight:900; font-size:1rem;
+  letter-spacing:0.12em;
+  color:var(--teal);
+}
+.nav-logo span { color:var(--amber); }
+.nav-links { display:flex; gap:2.5rem; list-style:none; }
+.nav-links a {
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.65rem; letter-spacing:0.3em;
+  color:var(--text-dim);
+  transition:color .2s;
+}
+.nav-links a:hover { color:var(--teal); }
+@media(max-width:600px){ .nav-links{display:none;} }
+
+/* ── HERO ── */
+#hero {
+  position:relative; height:100vh; min-height:600px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden;
+}
+#hero-canvas { position:absolute; inset:0; width:100%; height:100%; }
+.hero-content { position:relative; z-index:2; text-align:center; padding:0 1.5rem; }
+.hero-eyebrow {
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.65rem; letter-spacing:0.45em;
+  color:var(--teal); text-transform:uppercase;
+  margin-bottom:1.5rem;
+  opacity:0; animation:fadeUp .9s .1s ease forwards;
+}
+.hero-title {
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(3rem,9vw,7.5rem);
+  font-weight:900; line-height:.92;
+  background:linear-gradient(135deg,#00e5b3 0%,#4fc3f7 45%,#ffb347 90%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 50px rgba(0,229,179,.35));
+  opacity:0; animation:fadeUp .9s .25s ease forwards;
+}
+.hero-sub {
+  font-size:clamp(.9rem,2.5vw,1.35rem); font-weight:300;
+  letter-spacing:.25em; color:var(--text-dim);
+  margin-top:1rem;
+  opacity:0; animation:fadeUp .9s .4s ease forwards;
+}
+.hero-tags {
+  display:flex; flex-wrap:wrap; gap:.65rem;
+  justify-content:center; margin-top:2rem;
+  opacity:0; animation:fadeUp .9s .55s ease forwards;
+}
+.tag {
+  border:1px solid var(--border);
+  padding:.35rem 1rem;
+  border-radius:2rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.62rem; letter-spacing:.25em;
+  color:var(--teal);
+  background:rgba(0,229,179,.04);
+  backdrop-filter:blur(12px);
+}
+.hero-cta {
+  display:flex; gap:1rem; justify-content:center;
+  flex-wrap:wrap; margin-top:2.5rem;
+  opacity:0; animation:fadeUp .9s .7s ease forwards;
+}
+.btn-p {
+  background:var(--teal); color:#000;
+  padding:.85rem 2.2rem;
+  border:none; border-radius:4px;
+  font-family:'Orbitron',sans-serif;
+  font-size:.7rem; font-weight:700; letter-spacing:.15em;
+  cursor:pointer;
+  box-shadow:0 0 30px rgba(0,229,179,.45);
+  transition:all .3s;
+}
+.btn-p:hover { background:var(--teal2); box-shadow:0 0 55px rgba(0,229,179,.8); transform:translateY(-2px); }
+.btn-g {
+  background:transparent; color:var(--teal);
+  padding:.85rem 2.2rem;
+  border:1px solid var(--teal); border-radius:4px;
+  font-family:'Orbitron',sans-serif;
+  font-size:.7rem; font-weight:700; letter-spacing:.15em;
+  cursor:pointer; transition:all .3s;
+}
+.btn-g:hover { background:rgba(0,229,179,.1); transform:translateY(-2px); }
+.scroll-hint {
+  position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:.5rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.6rem; letter-spacing:.35em; color:var(--text-dim);
+  animation:bounce 2.5s infinite;
+}
+
+/* ── SECTIONS ── */
+.wrap { max-width:1200px; margin:0 auto; padding:0 2rem; }
+.sec { padding:7rem 0; }
+.sec-bg-alt { background:linear-gradient(180deg,var(--bg) 0%,var(--bg3) 50%,var(--bg) 100%); }
+.sec-label {
+  font-family:'Share Tech Mono',monospace;
+  font-size:.6rem; letter-spacing:.45em;
+  color:var(--teal); text-transform:uppercase;
+  margin-bottom:.75rem;
+}
+.sec-title {
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.6rem,4vw,2.8rem);
+  font-weight:700; line-height:1.1;
+  margin-bottom:1rem;
+}
+.sec-desc { font-size:1.05rem; color:var(--text-dim); line-height:1.8; max-width:620px; }
+.line { width:56px; height:2px; background:linear-gradient(90deg,var(--teal),transparent); margin:1.5rem 0; }
+
+/* ── CONCEPTS SECTION ── */
+.concepts-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:3rem; margin-top:3.5rem; align-items:start;
+}
+@media(max-width:768px){ .concepts-grid{grid-template-columns:1fr;} }
+
+.canvas-box {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px; overflow:hidden;
+  position:relative;
+}
+.canvas-box canvas { display:block; width:100%; }
+.canvas-tag {
+  position:absolute; top:.85rem; left:1rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.6rem; letter-spacing:.3em; color:var(--teal);
+}
+.legend {
+  display:flex; gap:1.5rem; flex-wrap:wrap;
+  padding:.85rem 1rem;
+  border-top:1px solid var(--border);
+  background:rgba(0,0,0,.25);
+}
+.leg-item { display:flex; align-items:center; gap:.5rem; font-family:'Share Tech Mono',monospace; font-size:.6rem; letter-spacing:.15em; color:var(--text-dim); }
+.leg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+.info-stack { display:flex; flex-direction:column; gap:1.25rem; }
+.info-card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px; padding:1.5rem;
+  position:relative; overflow:hidden;
+  transition:transform .3s, border-color .3s;
+}
+.info-card:hover { transform:translateX(5px); border-color:rgba(0,229,179,.35); }
+.info-card::before {
+  content:''; position:absolute;
+  left:0; top:0; bottom:0; width:3px;
+  border-radius:3px 0 0 3px;
+}
+.ic-standing::before { background:var(--amber); }
+.ic-node::before { background:var(--blue); }
+.ic-anti::before { background:var(--teal); }
+
+.ic-head {
+  font-family:'Orbitron',sans-serif;
+  font-size:.8rem; font-weight:700;
+  letter-spacing:.08em; margin-bottom:.5rem;
+}
+.ic-standing .ic-head { color:var(--amber); }
+.ic-node .ic-head { color:var(--blue); }
+.ic-anti .ic-head { color:var(--teal); }
+.ic-body { font-size:.95rem; color:var(--text-dim); line-height:1.65; }
+
+/* ── SIMULATOR ── */
+#simulator {
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.sim-controls { display:flex; gap:.75rem; flex-wrap:wrap; margin:2rem 0 1.5rem; }
+.h-btn {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  padding:.65rem 1.5rem;
+  border-radius:5px;
+  font-family:'Orbitron',sans-serif;
+  font-size:.65rem; font-weight:700; letter-spacing:.1em;
+  cursor:pointer; transition:all .25s;
+  line-height:1.6;
+}
+.h-btn small { font-size:.5rem; opacity:.6; display:block; }
+.h-btn.active, .h-btn:hover {
+  background:rgba(0,229,179,.08);
+  border-color:var(--teal); color:var(--teal);
+  box-shadow:0 0 20px rgba(0,229,179,.18);
+}
+.sim-stats {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1rem; margin-top:1.5rem;
+}
+@media(max-width:600px){ .sim-stats{grid-template-columns:1fr 1fr;} }
+.s-stat {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:8px; padding:1.1rem; text-align:center;
+}
+.s-val {
+  font-family:'Orbitron',sans-serif;
+  font-size:1.4rem; font-weight:700; color:var(--teal);
+}
+.s-lbl {
+  font-family:'Share Tech Mono',monospace;
+  font-size:.58rem; letter-spacing:.2em; color:var(--text-dim);
+  margin-top:.3rem;
+}
+
+/* ── QUIZ ── */
+#quiz { max-width:820px; margin:0 auto; padding:7rem 2rem; }
+.quiz-hdr {
+  display:flex; justify-content:space-between;
+  align-items:center; flex-wrap:wrap; gap:1rem;
+  margin-bottom:2rem;
+}
+.xp-wrap {
+  display:flex; align-items:center; gap:1rem;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:2rem; padding:.7rem 1.5rem;
+}
+.xp-lbl { font-family:'Orbitron',sans-serif; font-size:.7rem; color:var(--amber); }
+.xp-bar { width:130px; height:6px; background:rgba(255,255,255,.08); border-radius:3px; overflow:hidden; }
+.xp-fill { height:100%; background:linear-gradient(90deg,var(--teal),var(--blue)); border-radius:3px; transition:width .5s ease; }
+.streak { font-family:'Orbitron',sans-serif; font-size:.75rem; color:var(--amber); background:rgba(255,179,71,.08); border:1px solid rgba(255,179,71,.25); padding:.4rem .9rem; border-radius:4px; }
+
+.q-card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px; padding:2.5rem;
+  position:relative; overflow:hidden;
+}
+.q-card::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--teal),var(--blue),var(--amber));
+}
+.q-num { font-family:'Share Tech Mono',monospace; font-size:.6rem; letter-spacing:.35em; color:var(--teal); margin-bottom:1rem; }
+.q-txt { font-size:1.25rem; font-weight:600; line-height:1.55; margin-bottom:2rem; }
+.q-opts { display:flex; flex-direction:column; gap:.75rem; }
+.q-opt {
+  background:var(--bg3); border:1px solid rgba(255,255,255,.07);
+  border-radius:8px; padding:1rem 1.25rem;
+  cursor:pointer; font-size:1rem; color:var(--text);
+  transition:all .2s;
+  display:flex; align-items:flex-start; gap:1rem;
+}
+.q-opt:hover { border-color:var(--teal); background:rgba(0,229,179,.05); }
+.q-opt.correct { border-color:var(--teal); background:rgba(0,229,179,.12); color:var(--teal); }
+.q-opt.wrong { border-color:var(--red); background:rgba(255,77,109,.1); color:#ff8fa3; }
+.q-opt.disabled { pointer-events:none; }
+.opt-l {
+  font-family:'Orbitron',sans-serif; font-size:.65rem; font-weight:700;
+  width:24px; height:24px; border-radius:4px;
+  background:rgba(255,255,255,.07);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.q-fb {
+  margin-top:1.25rem; padding:1rem 1.25rem;
+  border-radius:8px; font-size:.95rem; line-height:1.65;
+  display:none;
+}
+.q-fb.show { display:block; }
+.q-fb.ok { background:rgba(0,229,179,.08); border:1px solid rgba(0,229,179,.25); color:var(--teal); }
+.q-fb.no { background:rgba(255,77,109,.08); border:1px solid rgba(255,77,109,.25); color:#ff8fa3; }
+.q-next { width:100%; margin-top:1.5rem; display:none; }
+
+.result { display:none; text-align:center; padding:3rem 0; }
+.result.show { display:block; }
+.r-title { font-family:'Orbitron',sans-serif; font-size:1.8rem; font-weight:900; color:var(--teal); margin-bottom:.75rem; }
+.r-score { font-family:'Orbitron',sans-serif; font-size:4.5rem; font-weight:900; background:linear-gradient(135deg,var(--teal),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.r-msg { font-size:1.05rem; color:var(--text-dim); margin:.75rem 0 2rem; line-height:1.7; }
+
+/* ── ABOUT ── */
+#about {
+  border-top:1px solid var(--border);
+  background:var(--bg3);
+  padding:7rem 0;
+}
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+@media(max-width:768px){ .about-grid{grid-template-columns:1fr;} }
+.team-row { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.5rem; }
+.t-chip {
+  background:rgba(0,229,179,.07); border:1px solid rgba(0,229,179,.2);
+  border-radius:2rem; padding:.4rem 1rem;
+  font-family:'Share Tech Mono',monospace; font-size:.72rem; color:var(--teal);
+}
+.p-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.p-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:1.5rem; }
+.p-num { font-family:'Orbitron',sans-serif; font-size:2.2rem; font-weight:900; color:var(--teal); }
+.p-num span { font-size:1.1rem; }
+.p-txt { font-size:.85rem; color:var(--text-dim); margin-top:.3rem; }
+
+/* ── FOOTER ── */
+footer {
+  text-align:center; padding:2rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.62rem; letter-spacing:.25em; color:var(--text-dim);
+  border-top:1px solid var(--border);
+}
+
+/* ── KEYFRAMES ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(28px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes bounce {
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  50%      { transform:translateX(-50%) translateY(8px); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">LUMINA <span>FLUTE</span></a>
+  <ul class="nav-links">
+    <li><a href="#concepts">WAVES</a></li>
+    <li><a href="#simulator">SIMULATOR</a></li>
+    <li><a href="#quiz">QUIZ</a></li>
+    <li><a href="#about">PROJECT</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">IDC School of Design &nbsp;·&nbsp; HASMED Design Thinking &nbsp;·&nbsp; S4F5</div>
+    <h1 class="hero-title">LUMINA<br>FLUTE</h1>
+    <p class="hero-sub">WHERE SOUND BECOMES LIGHT</p>
+    <div class="hero-tags">
+      <span class="tag">Standing Waves</span>
+      <span class="tag">Nodes &amp; Antinodes</span>
+      <span class="tag">Arduino + LEDs</span>
+      <span class="tag">Bamboo Bansuri</span>
+      <span class="tag">Class 9 – 12</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#simulator" class="btn-p">EXPLORE SIMULATOR</a>
+      <a href="#quiz" class="btn-g">TEST YOUR KNOWLEDGE</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
+      <path d="M7 3 L7 19 M1 13 L7 19 L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</div>
+
+<!-- CONCEPTS -->
+<section id="concepts" class="sec">
+  <div class="wrap">
+    <div class="sec-label">// PHYSICS FUNDAMENTALS</div>
+    <h2 class="sec-title">The Science Behind<br><span style="color:var(--teal)">Standing Waves</span></h2>
+    <div class="line"></div>
+    <p class="sec-desc">Sound inside a flute bounces between its open ends, creating two waves traveling in opposite directions. Their superposition forms a <em>standing wave</em> — with fixed, glowing antinodes and dark, still nodes.</p>
+    <div class="concepts-grid">
+      <div>
+        <div class="canvas-box">
+          <span class="canvas-tag">// LIVE WAVE FORMATION</span>
+          <canvas id="wave-canvas" height="260"></canvas>
+          <div class="legend">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--teal)"></div>WAVE 1 →</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div>← WAVE 2</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>STANDING WAVE</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#4fc3f7;border:2px solid #fff"></div>NODE (N)</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--teal);box-shadow:0 0 6px var(--teal)"></div>ANTINODE (A)</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-stack">
+        <div class="info-card ic-standing">
+          <div class="ic-head">〰️ STANDING WAVE</div>
+          <div class="ic-body">Formed when two identical waves travel in opposite directions and interfere. The pattern appears stationary — it doesn't move. Inside a flute, reflected sound waves create this beautiful phenomenon, locking energy at specific positions.</div>
+        </div>
+        <div class="info-card ic-node">
+          <div class="ic-head">● NODE — Zero Displacement</div>
+          <div class="ic-body">Points where particles <em>never</em> move. Destructive interference keeps displacement permanently at zero. In a sound wave, nodes are points of maximum pressure variation. On the Lumina Flute, the LED here stays <strong style="color:var(--blue)">dim</strong>.</div>
+        </div>
+        <div class="info-card ic-anti">
+          <div class="ic-head">◎ ANTINODE — Maximum Displacement</div>
+          <div class="ic-body">Points of maximum oscillation — particles vibrate with greatest amplitude here. In a flute's open ends, antinodes always form. Pressure stays near atmospheric (constant). On the Lumina Flute, the LED here <strong style="color:var(--teal)">glows brightest</strong>!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIMULATOR -->
+<div id="simulator" class="sec sec-bg-alt">
+  <div class="wrap">
+    <div class="sec-label">// INTERACTIVE SIMULATION</div>
+    <h2 class="sec-title">Flute Harmonics<br><span style="color:var(--teal)">Simulator</span></h2>
+    <div class="line"></div>
+    <p class="sec-desc">Select a harmonic to see the standing wave pattern inside the bamboo flute. Bright LEDs = antinodes. Dim LEDs = nodes. Exactly like the physical Lumina Flute!</p>
+
+    <div class="sim-controls">
+      <button class="h-btn active" id="hb1" onclick="setH(1)">1ST HARMONIC<small>FUNDAMENTAL</small></button>
+      <button class="h-btn" id="hb2" onclick="setH(2)">2ND HARMONIC<small>1ST OVERTONE</small></button>
+      <button class="h-btn" id="hb3" onclick="setH(3)">3RD HARMONIC<small>2ND OVERTONE</small></button>
+      <button class="h-btn" id="hb4" onclick="setH(4)">4TH HARMONIC<small>3RD OVERTONE</small></button>
+    </div>
+
+    <div class="canvas-box" style="border-radius:16px; background:#04101a;">
+      <canvas id="flute-canvas" height="340" style="width:100%;display:block;"></canvas>
+    </div>
+
+    <div class="sim-stats">
+      <div class="s-stat"><div class="s-val" id="sv1">n = 1</div><div class="s-lbl">HARMONIC NUMBER</div></div>
+      <div class="s-stat"><div class="s-val" id="sv2">1 NODE</div><div class="s-lbl">NODES (MIN DISPLACEMENT)</div></div>
+      <div class="s-stat"><div class="s-val" id="sv3">2 ANTINODES</div><div class="s-lbl">ANTINODES (MAX DISPLACEMENT)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz">
+  <div class="sec-label">// KNOWLEDGE QUEST</div>
+  <h2 class="sec-title" style="font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.8rem);font-weight:700;margin-bottom:1rem;">Test Your<br><span style="color:var(--teal)">Wave IQ</span></h2>
+  <div class="line"></div>
+  <p class="sec-desc" style="margin-bottom:2.5rem;">8 questions on standing waves, nodes, antinodes &amp; the Lumina Flute. Earn XP — bonus points for streaks!</p>
+
+  <div class="quiz-hdr">
+    <div class="xp-wrap">
+      <span class="xp-lbl">⚡ XP</span>
+      <div class="xp-bar"><div class="xp-fill" id="xfill"></div></div>
+      <span class="xp-lbl" id="xcount">0</span>
+    </div>
+    <div class="streak" id="streak">🔥 Streak: 0</div>
+  </div>
+
+  <div class="q-card" id="qcard">
+    <div class="q-num" id="qnum">QUESTION 1 / 8</div>
+    <div class="q-txt" id="qtxt"></div>
+    <div class="q-opts" id="qopts"></div>
+    <div class="q-fb" id="qfb"></div>
+    <button class="btn-p q-next" id="qnext" onclick="nextQ()">NEXT →</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="r-title" id="rtitle">🏆 MISSION COMPLETE!</div>
+    <div class="r-score" id="rscore">0 / 8</div>
+    <div class="r-msg" id="rmsg"></div>
+    <button class="btn-p" onclick="restartQ()">PLAY AGAIN →</button>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div>
+        <div class="sec-label">// THE PROJECT</div>
+        <h2 class="sec-title" style="font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.8rem);font-weight:700;margin-bottom:1rem;">Lumina Flute<br><span style="color:var(--teal)">by S4F5</span></h2>
+        <div class="line"></div>
+        <p class="sec-desc">A 700 mm bamboo bansuri flute embedded with LEDs, a microphone sensor, and an Arduino UNO. When played, it maps sound vibrations to light — visualizing <span style="color:var(--blue)">nodes</span> (dim LEDs) and <span style="color:var(--teal)">antinodes</span> (bright LEDs) in real time.</p>
+        <p class="sec-desc" style="margin-top:1rem;">Designed for students aged 14–18 who struggle with abstract wave physics. Traditional methods rely on static diagrams — the Lumina Flute makes the invisible, visible.</p>
+        <div class="team-row">
+          <span class="t-chip">Arya</span><span class="t-chip">Aakash</span>
+          <span class="t-chip">Shruti</span><span class="t-chip">Saksham</span>
+          <span class="t-chip">Tanish</span><span class="t-chip">Udit</span>
+        </div>
+        <p style="margin-top:1.25rem;font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.22em;color:var(--text-dim);">HASMED · IDC SCHOOL OF DESIGN · PROF. MILOUNI DESAI KAPOOR</p>
+      </div>
+      <div class="p-grid">
+        <div class="p-card"><div class="p-num">700<span>mm</span></div><div class="p-txt">Bamboo Bansuri Length</div></div>
+        <div class="p-card"><div class="p-num">8<span>+</span></div><div class="p-txt">LEDs Mapped to Wave Positions</div></div>
+        <div class="p-card"><div class="p-num">4</div><div class="p-txt">Harmonics Demonstrated Live</div></div>
+        <div class="p-card"><div class="p-num">14<span>–18</span></div><div class="p-txt">Target Student Age Group</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 LUMINA FLUTE · S4F5 · IDC SCHOOL OF DESIGN · SOUND MADE VISIBLE</footer>
+
+<script>
+/* ============================================================
+   HERO CANVAS — Particle + Wave Atmosphere
+   ============================================================ */
+const HC = document.getElementById('hero-canvas');
+const HX = HC.getContext('2d');
+let HW, HH, heroT = 0;
+const pts = [];
+
+function resizeHero() {
+  HW = HC.width = window.innerWidth;
+  HH = HC.height = window.innerHeight;
+}
+resizeHero();
+window.addEventListener('resize', resizeHero);
+
+for (let i = 0; i < 110; i++) {
+  pts.push({
+    x: Math.random() * 2000,
+    y: Math.random() * 1200,
+    r: Math.random() * 1.8 + .3,
+    vx: (Math.random() - .5) * .25,
+    vy: (Math.random() - .5) * .25,
+    a: Math.random() * .4 + .1,
+    h: [168, 200, 200, 35][Math.floor(Math.random() * 4)]
+  });
+}
+
+function heroLoop() {
+  HX.clearRect(0, 0, HW, HH);
+
+  // Deep bg
+  const rg = HX.createRadialGradient(HW/2, HH/2, 0, HW/2, HH/2, HH*.9);
+  rg.addColorStop(0, '#08192b');
+  rg.addColorStop(1, '#020b14');
+  HX.fillStyle = rg;
+  HX.fillRect(0, 0, HW, HH);
+
+  // Ambient horizontal wave lines
+  for (let i = 0; i < 6; i++) {
+    const y = HH * (.15 + i * .14);
+    const amp = 18 + i * 4;
+    const f = .008 + i * .002;
+    HX.beginPath();
+    for (let x = 0; x <= HW; x += 5) {
+      const dy = amp * Math.sin(x * f + heroT + i * 1.1);
+      x === 0 ? HX.moveTo(x, y + dy) : HX.lineTo(x, y + dy);
+    }
+    HX.strokeStyle = `rgba(0,229,179,${.015 + i * .008})`;
+    HX.lineWidth = 1;
+    HX.stroke();
+  }
+
+  // Particles
+  pts.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = HW; if (p.x > HW) p.x = 0;
+    if (p.y < 0) p.y = HH; if (p.y > HH) p.y = 0;
+    HX.beginPath();
+    HX.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    HX.fillStyle = `hsla(${p.h},75%,65%,${p.a})`;
+    HX.fill();
+  });
+
+  heroT += .016;
+  requestAnimationFrame(heroLoop);
+}
+heroLoop();
+
+/* ============================================================
+   WAVE FORMATION CANVAS
+   ============================================================ */
+const WC = document.getElementById('wave-canvas');
+const WX = WC.getContext('2d');
+let wT = 0;
+
+function resizeWC() {
+  WC.width = WC.parentElement.clientWidth;
+}
+resizeWC();
+window.addEventListener('resize', () => { resizeWC(); });
+
+function waveLoop() {
+  const W = WC.width, H = WC.height;
+  WX.clearRect(0, 0, W, H);
+  WX.fillStyle = '#06111e';
+  WX.fillRect(0, 0, W, H);
+
+  const amp = Math.min(30, H * .1);
+  const freq = (2 * Math.PI / W) * 2;
+  const cy1 = H * .28, cy2 = H * .68;
+
+  // --- WAVE 1 (rightward, teal) ---
+  WX.beginPath();
+  for (let x = 0; x <= W; x++) {
+    const y = amp * Math.sin(freq * x - wT);
+    x === 0 ? WX.moveTo(x, cy1 + y) : WX.lineTo(x, cy1 + y);
+  }
+  WX.strokeStyle = 'rgba(0,229,179,.75)'; WX.lineWidth = 2; WX.stroke();
+
+  // --- WAVE 2 (leftward, blue) ---
+  WX.beginPath();
+  for (let x = 0; x <= W; x++) {
+    const y = amp * Math.sin(freq * x + wT);
+    x === 0 ? WX.moveTo(x, cy1 + y) : WX.lineTo(x, cy1 + y);
+  }
+  WX.strokeStyle = 'rgba(79,195,247,.75)'; WX.lineWidth = 2; WX.stroke();
+
+  // --- STANDING WAVE (sum, amber) ---
+  WX.beginPath();
+  for (let x = 0; x <= W; x++) {
+    const y = amp * Math.sin(freq * x - wT) + amp * Math.sin(freq * x + wT);
+    x === 0 ? WX.moveTo(x, cy2 + y) : WX.lineTo(x, cy2 + y);
+  }
+  WX.strokeStyle = '#ffb347'; WX.lineWidth = 2.5; WX.stroke();
+
+  // Division line
+  WX.setLineDash([4, 4]);
+  WX.beginPath();
+  WX.moveTo(0, cy1 + amp + 14); WX.lineTo(W, cy1 + amp + 14);
+  WX.strokeStyle = 'rgba(255,255,255,.07)'; WX.lineWidth = 1; WX.stroke();
+  WX.setLineDash([]);
+
+  // Labels
+  WX.font = '10px Share Tech Mono, monospace';
+  WX.fillStyle = 'rgba(0,229,179,.6)'; WX.textAlign = 'left';
+  WX.fillText('WAVE 1 →', 12, cy1 - amp - 8);
+  WX.fillStyle = 'rgba(79,195,247,.6)';
+  WX.fillText('← WAVE 2', 12, cy1 + amp + 24);
+  WX.fillStyle = 'rgba(255,179,71,.8)';
+  WX.fillText('STANDING WAVE', 12, cy2 - amp - 8);
+
+  // Nodes & antinodes on standing wave
+  const env = Math.abs(Math.cos(wT));
+  for (let n = 0; n <= 4; n++) {
+    const nx = n * W / 4;
+    // Node marker
+    WX.beginPath();
+    WX.arc(nx, cy2, 6, 0, Math.PI * 2);
+    WX.fillStyle = '#1a3050'; WX.fill();
+    WX.strokeStyle = '#4fc3f7'; WX.lineWidth = 1.5; WX.stroke();
+    WX.fillStyle = 'rgba(79,195,247,.7)'; WX.textAlign = 'center'; WX.font = 'bold 8px Share Tech Mono';
+    WX.fillText('N', nx, cy2 + 18);
+  }
+  for (let n = 0; n < 4; n++) {
+    const ax = (n + .5) * W / 4;
+    const g = WX.createRadialGradient(ax, cy2, 0, ax, cy2, 18 + env * 8);
+    g.addColorStop(0, `rgba(0,229,179,${env * .45})`);
+    g.addColorStop(1, 'transparent');
+    WX.beginPath(); WX.arc(ax, cy2, 18 + env * 8, 0, Math.PI * 2);
+    WX.fillStyle = g; WX.fill();
+    WX.beginPath(); WX.arc(ax, cy2, 6, 0, Math.PI * 2);
+    WX.fillStyle = `rgba(0,229,179,${.3 + env * .7})`; WX.fill();
+    WX.strokeStyle = '#00e5b3'; WX.lineWidth = 1.5; WX.stroke();
+    WX.fillStyle = `rgba(0,229,179,${.6 + env * .4})`; WX.textAlign = 'center';
+    WX.font = 'bold 8px Share Tech Mono';
+    WX.fillText('A', ax, cy2 + 18);
+  }
+
+  wT += .028;
+  requestAnimationFrame(waveLoop);
+}
+waveLoop();
+
+/* ============================================================
+   FLUTE HARMONICS SIMULATOR
+   ============================================================ */
+const FC = document.getElementById('flute-canvas');
+const FX = FC.getContext('2d');
+let fT = 0, curH = 1;
+
+function resizeFC() { FC.width = FC.parentElement.clientWidth; }
+resizeFC();
+window.addEventListener('resize', resizeFC);
+
+// Open pipe harmonic data
+const HD = {
+  1: { nd: [.5], an: [0,1], color:'#00e5b3', lam:'2L', f:'f₁' },
+  2: { nd: [.25,.75], an: [0,.5,1], color:'#4fc3f7', lam:'L', f:'2f₁' },
+  3: { nd: [1/6,.5,5/6], an: [0,1/3,2/3,1], color:'#b794f4', lam:'2L/3', f:'3f₁' },
+  4: { nd: [.125,.375,.625,.875], an: [0,.25,.5,.75,1], color:'#ffb347', lam:'L/2', f:'4f₁' },
+};
+
+function setH(n) {
+  curH = n;
+  [1,2,3,4].forEach(i => {
+    document.getElementById('hb'+i).classList.toggle('active', i===n);
+  });
+  const d = HD[n];
+  document.getElementById('sv1').textContent = `n = ${n}`;
+  document.getElementById('sv2').textContent = `${d.nd.length} ${d.nd.length===1?'NODE':'NODES'}`;
+  document.getElementById('sv3').textContent = `${d.an.length} ANTINODES`;
+}
+
+function fluteLoop() {
+  const W = FC.width, H = FC.height;
+  FX.clearRect(0, 0, W, H);
+  FX.fillStyle = '#04101a';
+  FX.fillRect(0, 0, W, H);
+
+  const d = HD[curH];
+  const col = d.color;
+  const PAD = Math.min(80, W * .07);
+  const FX0 = PAD, FY0 = H * .28, FW = W - PAD * 2, FH = H * .44;
+  const CY = FY0 + FH / 2;
+  const env = Math.cos(fT * 2.2);
+
+  // ── BAMBOO BODY ──
+  const bg = FX.createLinearGradient(0, FY0, 0, FY0 + FH);
+  bg.addColorStop(0,  '#2f1b08');
+  bg.addColorStop(.35,'#5c3a18');
+  bg.addColorStop(.65,'#3e2510');
+  bg.addColorStop(1,  '#1d0d05');
+  FX.fillStyle = bg;
+  FX.beginPath();
+  FX.roundRect(FX0, FY0, FW, FH, FH/2);
+  FX.fill();
+
+  // highlight stripe
+  const hl = FX.createLinearGradient(0, FY0, 0, FY0 + FH * .38);
+  hl.addColorStop(0, 'rgba(255,215,120,.22)');
+  hl.addColorStop(1, 'rgba(255,215,120,0)');
+  FX.fillStyle = hl;
+  FX.beginPath();
+  FX.roundRect(FX0+6, FY0+4, FW-12, FH*.34, 10);
+  FX.fill();
+
+  // decorative bands
+  [.1,.22,.36,.52,.65,.78,.9].forEach(bp => {
+    const bx = FX0 + FW*bp;
+    FX.fillStyle = '#150800';
+    FX.beginPath(); FX.roundRect(bx-4.5, FY0-1, 9, FH+2, 3); FX.fill();
+    FX.strokeStyle = 'rgba(255,190,90,.25)'; FX.lineWidth = 1; FX.stroke();
+  });
+
+  // open end glows
+  [FX0, FX0+FW].forEach(ex => {
+    const g = FX.createRadialGradient(ex, CY, 0, ex, CY, 38);
+    g.addColorStop(0, col+'77'); g.addColorStop(1, 'transparent');
+    FX.beginPath(); FX.arc(ex, CY, 38, 0, Math.PI*2);
+    FX.fillStyle = g; FX.fill();
+  });
+
+  // ── STANDING WAVE ──
+  const wAmp = FH * .28;
+  // open-open: y = A*cos(n*π*x/L)*cos(ωt)
+  FX.beginPath();
+  FX.moveTo(FX0, CY);
+  for (let px = 0; px <= FW; px++) {
+    const xf = px/FW;
+    const y = wAmp * Math.cos(curH * Math.PI * xf) * env;
+    FX.lineTo(FX0+px, CY+y);
+  }
+  FX.lineTo(FX0+FW, CY);
+  FX.closePath();
+  const wg = FX.createLinearGradient(FX0, CY-wAmp, FX0, CY+wAmp);
+  wg.addColorStop(0, col+'55'); wg.addColorStop(.5, col+'22'); wg.addColorStop(1, col+'55');
+  FX.fillStyle = wg; FX.fill();
+
+  // top outline
+  FX.beginPath();
+  for (let px = 0; px <= FW; px++) {
+    const y = wAmp * Math.cos(curH * Math.PI * (px/FW)) * env;
+    px===0 ? FX.moveTo(FX0+px, CY+y) : FX.lineTo(FX0+px, CY+y);
+  }
+  FX.strokeStyle = col+'cc'; FX.lineWidth = 2.5;
+  FX.shadowColor = col; FX.shadowBlur = 12; FX.stroke();
+
+  // mirror outline
+  FX.beginPath();
+  for (let px = 0; px <= FW; px++) {
+    const y = wAmp * Math.cos(curH * Math.PI * (px/FW)) * env;
+    px===0 ? FX.moveTo(FX0+px, CY-y) : FX.lineTo(FX0+px, CY-y);
+  }
+  FX.strokeStyle = col+'66'; FX.lineWidth = 1.5; FX.shadowBlur = 0; FX.stroke();
+
+  // center axis
+  FX.setLineDash([5,6]);
+  FX.beginPath(); FX.moveTo(FX0,CY); FX.lineTo(FX0+FW,CY);
+  FX.strokeStyle='rgba(255,255,255,.1)'; FX.lineWidth=1; FX.stroke();
+  FX.setLineDash([]);
+
+  // ── NODES ──
+  d.nd.forEach(pos => {
+    const nx = FX0 + pos * FW;
+    FX.setLineDash([3,4]);
+    FX.beginPath(); FX.moveTo(nx, FY0+6); FX.lineTo(nx, FY0+FH-6);
+    FX.strokeStyle='rgba(79,195,247,.4)'; FX.lineWidth=1.5; FX.stroke();
+    FX.setLineDash([]);
+    FX.beginPath(); FX.arc(nx, CY, 11, 0, Math.PI*2);
+    FX.fillStyle='#0d2035'; FX.fill();
+    FX.strokeStyle='#4fc3f7'; FX.lineWidth=2; FX.stroke();
+    FX.fillStyle='#4fc3f7'; FX.textAlign='center';
+    FX.font='bold 9px Share Tech Mono'; FX.fillText('N', nx, FY0-10);
+    FX.fillStyle='rgba(79,195,247,.5)'; FX.font='8px Share Tech Mono';
+    FX.fillText('node', nx, FY0+FH+18);
+  });
+
+  // ── ANTINODES ──
+  const br = Math.abs(env);
+  d.an.forEach(pos => {
+    const ax = FX0 + pos * FW;
+    const r = 20 + br*10;
+    const ag = FX.createRadialGradient(ax, CY, 0, ax, CY, r);
+    ag.addColorStop(0, col+Math.round(br*150).toString(16).padStart(2,'0'));
+    ag.addColorStop(1, 'transparent');
+    FX.beginPath(); FX.arc(ax,CY,r,0,Math.PI*2); FX.fillStyle=ag; FX.fill();
+    FX.beginPath(); FX.arc(ax,CY,11,0,Math.PI*2);
+    FX.fillStyle=`rgba(0,229,179,${.25+br*.75})`; FX.fill();
+    FX.shadowColor=col; FX.shadowBlur=16*br;
+    FX.strokeStyle=col; FX.lineWidth=2; FX.stroke();
+    FX.shadowBlur=0;
+    FX.fillStyle=col; FX.textAlign='center';
+    FX.font='bold 9px Share Tech Mono'; FX.fillText('A', ax, FY0-10);
+    FX.fillStyle=col+'99'; FX.font='8px Share Tech Mono';
+    FX.fillText('antinode', ax, FY0+FH+18);
+  });
+
+  // Info overlay
+  FX.fillStyle='rgba(0,229,179,.55)';
+  FX.font='11px Share Tech Mono'; FX.textAlign='left';
+  FX.fillText(`// HARMONIC ${curH}  ·  λ = ${d.lam}  ·  f = ${d.f}  ·  OPEN PIPE (BOTH ENDS)`, FX0, 22);
+  FX.textAlign='right'; FX.fillStyle='rgba(255,179,71,.5)';
+  FX.fillText(`${d.nd.length} node${d.nd.length!==1?'s':''} · ${d.an.length} antinodes`, W-FX0, 22);
+
+  fT += .04;
+  requestAnimationFrame(fluteLoop);
+}
+fluteLoop();
+
+/* ============================================================
+   QUIZ GAME
+   ============================================================ */
+const QS = [
+  {
+    q:"In a standing wave, what is a NODE?",
+    opts:["A point of maximum vibration and displacement","A point where displacement is always zero","The geometric center of any wave","A point of maximum energy transfer"],
+    ans:1,
+    fb:"✓ Nodes are points of zero displacement — particles here never move. In a flute, nodes correspond to areas of maximum pressure variation."
+  },
+  {
+    q:"A flute is an open pipe (open at both ends). What forms at each open end?",
+    opts:["A node — particles can't escape at the opening","A pressure maximum — air compresses there","An antinode — air molecules are free to oscillate with maximum amplitude","Nothing — open ends don't affect the standing wave"],
+    ans:2,
+    fb:"✓ Open ends create antinodes! Air molecules at an open end are free to vibrate with maximum amplitude. That's why flute LEDs glow brightest at the ends."
+  },
+  {
+    q:"Standing waves are created by:",
+    opts:["A single wave of very high frequency vibrating fast","Two waves of different frequencies colliding head-on","Two identical waves traveling in opposite directions and interfering","A wave that suddenly stops and stays in place"],
+    ans:2,
+    fb:"✓ Superposition! Two equal-frequency, equal-amplitude waves traveling in opposite directions interfere to create a standing wave with fixed node and antinode positions."
+  },
+  {
+    q:"How many ANTINODES does the 1st harmonic (fundamental) of a flute (open pipe) have?",
+    opts:["Zero","One","Two","Three"],
+    ans:2,
+    fb:"✓ The fundamental has 2 antinodes (one at each open end) and 1 node in the middle. Half a wavelength (λ = 2L) fits inside the flute."
+  },
+  {
+    q:"At a displacement ANTINODE in a sound wave, the pressure is:",
+    opts:["At maximum — highest pressure variation","Equal to the surrounding pressure variation","At minimum — nearly constant, close to atmospheric","Infinitely high due to maximum particle energy"],
+    ans:2,
+    fb:"✓ Displacement antinodes = pressure nodes! Particles at an antinode all move together, maintaining constant spacing and near-atmospheric pressure."
+  },
+  {
+    q:"Why does a flute play different notes when finger holes are covered?",
+    opts:["It changes the speed of sound inside the flute","It changes the effective length of the vibrating air column","It changes the density of the medium the sound travels through","It adds or removes harmonics from the wave pattern"],
+    ans:1,
+    fb:"✓ Covering or uncovering holes changes the effective pipe length (L). Since f = nv/2L, a shorter L gives a higher pitch — that's how different notes are played!"
+  },
+  {
+    q:"The Lumina Flute (S4F5 project) uses LEDs to visualize which physics concept?",
+    opts:["The speed of sound varying with air temperature","The pressure of the musician's breath in real time","Nodes (dim LEDs) and antinodes (bright LEDs) in a standing wave","The number of overtone harmonics present in the note played"],
+    ans:2,
+    fb:"✓ The Lumina Flute maps sound vibrations to LED brightness! Bright = antinode (max displacement), Dim = node (zero displacement). Physics made visible with Arduino!"
+  },
+  {
+    q:"If a 700 mm bamboo flute (L = 0.7 m) plays its fundamental, what is the wavelength? (v_sound = 340 m/s)",
+    opts:["λ = 0.35 m, f ≈ 971 Hz","λ = 0.7 m, f ≈ 486 Hz","λ = 1.4 m, f ≈ 243 Hz","λ = 2.8 m, f ≈ 121 Hz"],
+    ans:2,
+    fb:"✓ Open pipe fundamental: λ = 2L = 2 × 0.7 = 1.4 m. Frequency f = v/λ = 340/1.4 ≈ 243 Hz — close to B3, typical for a 700mm bansuri!"
+  }
+];
+
+let qIdx=0, score=0, xp=0, streak=0, done=false;
+
+function renderQ() {
+  const q = QS[qIdx];
+  document.getElementById('qnum').textContent = `QUESTION ${qIdx+1} / ${QS.length}`;
+  document.getElementById('qtxt').textContent = q.q;
+  const oc = document.getElementById('qopts');
+  oc.innerHTML = '';
+  ['A','B','C','D'].forEach((L,i) => {
+    const d = document.createElement('div');
+    d.className = 'q-opt';
+    d.innerHTML = `<span class="opt-l">${L}</span>${q.opts[i]}`;
+    d.onclick = () => checkA(i);
+    oc.appendChild(d);
+  });
+  const fb = document.getElementById('qfb');
+  fb.className='q-fb'; fb.textContent='';
+  document.getElementById('qnext').style.display='none';
+  done=false;
+}
+
+function checkA(sel) {
+  if (done) return; done=true;
+  const q=QS[qIdx];
+  document.querySelectorAll('.q-opt').forEach(o=>o.classList.add('disabled'));
+  const opts=document.querySelectorAll('.q-opt');
+  const fb=document.getElementById('qfb');
+  if (sel===q.ans) {
+    opts[sel].classList.add('correct');
+    score++; streak++; xp += 10 + (streak>=3?5:0);
+    fb.textContent=q.fb; fb.className='q-fb ok show';
+  } else {
+    opts[sel].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    streak=0;
+    fb.textContent='✗ Not quite! '+q.fb; fb.className='q-fb no show';
+  }
+  const maxXP=QS.length*15;
+  document.getElementById('xfill').style.width=`${Math.min(100,(xp/maxXP)*100)}%`;
+  document.getElementById('xcount').textContent=xp;
+  document.getElementById('streak').textContent=`🔥 Streak: ${streak}`;
+  const nx=document.getElementById('qnext');
+  nx.style.display='block';
+  nx.textContent=qIdx<QS.length-1?'NEXT QUESTION →':'SEE RESULTS →';
+}
+
+function nextQ() {
+  qIdx++;
+  if (qIdx>=QS.length) showResult();
+  else renderQ();
+}
+
+function showResult() {
+  document.getElementById('qcard').style.display='none';
+  const rs=document.getElementById('result'); rs.classList.add('show');
+  document.getElementById('rscore').textContent=`${score} / ${QS.length}`;
+  const p=score/QS.length;
+  let t,m;
+  if(p===1){t='🏆 PERFECT SCORE!';m='You are a Wave Physics Master! The Lumina Flute team would be proud.';}
+  else if(p>=.75){t='🌟 WAVE EXPERT!';m='Excellent grasp of standing wave physics! Try the simulator to visualize the concepts in action.';}
+  else if(p>=.5){t='📡 WAVE LEARNER';m='Good effort! Revisit the Interactive Simulator to strengthen your understanding of nodes and antinodes.';}
+  else{t='🔬 WAVE EXPLORER';m='Keep exploring! Play with the simulator, then try the quiz again. You\'ve got this!';}
+  document.getElementById('rtitle').textContent=t;
+  document.getElementById('rmsg').textContent=m;
+}
+
+function restartQ() {
+  qIdx=0;score=0;xp=0;streak=0;
+  document.getElementById('xfill').style.width='0%';
+  document.getElementById('xcount').textContent='0';
+  document.getElementById('streak').textContent='🔥 Streak: 0';
+  document.getElementById('qcard').style.display='block';
+  document.getElementById('result').classList.remove('show');
+  renderQ();
+}
+
+renderQ();
+
+
+</script>
+</body>
+</html>
